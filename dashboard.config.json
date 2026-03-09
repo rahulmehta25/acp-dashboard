@@ -1,0 +1,22 @@
+{
+  "branding": {
+    "title": "ACP MISSION CONTROL",
+    "subtitle": "OPENCLAW AGENT DISPATCH SYSTEM",
+    "version": "0.1.0"
+  },
+  "refresh": {
+    "intervalMs": 3000,
+    "sessionHistoryLimit": 20
+  },
+  "notifications": {
+    "sound": true,
+    "onComplete": true,
+    "onError": true,
+    "volume": 0.3
+  },
+  "display": {
+    "showHistory": true,
+    "historyLimit": 10,
+    "compactMode": false
+  }
+}
