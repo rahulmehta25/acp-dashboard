@@ -8,6 +8,7 @@ import {
   ensureLocalAccess,
   ensureTrustedOrigin,
 } from "@/lib/api-security";
+import { isDemoMode, getDemoConfig } from "@/lib/demo-data";
 
 export const dynamic = "force-dynamic";
 
@@ -386,6 +387,11 @@ export async function GET(req: Request) {
     return rateLimit.response;
   }
 
+  if (isDemoMode()) {
+    const response = NextResponse.json(getDemoConfig());
+    return applyHeaders(response, rateLimit.headers);
+  }
+
   const response = NextResponse.json(readConfig());
   return applyHeaders(response, rateLimit.headers);
 }
@@ -433,6 +439,18 @@ export async function POST(req: Request) {
         { error: `Payload too large. Max ${MAX_BODY_BYTES} bytes.` },
         { status: 413 }
       );
+      return applyHeaders(response, rateLimit.headers);
+    }
+  }
+
+  if (isDemoMode()) {
+    try {
+      const updates = await req.json();
+      const merged = validateAndMergeConfig(getDemoConfig() as DashboardConfig, updates);
+      const response = NextResponse.json({ ok: true, config: merged.config });
+      return applyHeaders(response, rateLimit.headers);
+    } catch {
+      const response = NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
       return applyHeaders(response, rateLimit.headers);
     }
   }

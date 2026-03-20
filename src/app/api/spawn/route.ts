@@ -9,6 +9,7 @@ import {
   ensureLocalAccess,
   ensureTrustedOrigin,
 } from "@/lib/api-security";
+import { isDemoMode, getDemoSpawnResult } from "@/lib/demo-data";
 
 export const dynamic = "force-dynamic";
 
@@ -196,6 +197,27 @@ export async function POST(request: Request) {
         { error: `Payload too large. Max ${MAX_BODY_BYTES} bytes.` },
         { status: 413 }
       );
+      return applyHeaders(response, rateLimit.headers);
+    }
+  }
+
+  if (isDemoMode()) {
+    try {
+      const rawBody = await request.json();
+      if (!isRecord(rawBody) || typeof rawBody.agent !== "string" || !ALLOWED_AGENTS.has(rawBody.agent)) {
+        const response = NextResponse.json({ error: "Invalid agent" }, { status: 400 });
+        return applyHeaders(response, rateLimit.headers);
+      }
+      const task = sanitizeTask(rawBody.task);
+      if (!task) {
+        const response = NextResponse.json({ error: "Invalid task" }, { status: 400 });
+        return applyHeaders(response, rateLimit.headers);
+      }
+      const mode = rawBody.mode === "one-shot" ? "one-shot" : "persistent";
+      const response = NextResponse.json(getDemoSpawnResult(rawBody.agent, task, mode));
+      return applyHeaders(response, rateLimit.headers);
+    } catch {
+      const response = NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
       return applyHeaders(response, rateLimit.headers);
     }
   }

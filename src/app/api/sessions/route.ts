@@ -8,6 +8,7 @@ import {
   enforceRateLimit,
   ensureLocalAccess,
 } from "@/lib/api-security";
+import { isDemoMode, getDemoSessions } from "@/lib/demo-data";
 
 const execFileAsync = promisify(execFile);
 const MAX_BUFFER = 1024 * 1024;
@@ -380,6 +381,11 @@ export async function GET(req: Request) {
 
   if (rateLimit.response) {
     return rateLimit.response;
+  }
+
+  if (isDemoMode()) {
+    const response = NextResponse.json(getDemoSessions());
+    return applyHeaders(response, rateLimit.headers);
   }
 
   try {

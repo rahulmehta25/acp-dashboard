@@ -9,6 +9,7 @@ import {
   ensureLocalAccess,
   ensureTrustedOrigin,
 } from "@/lib/api-security";
+import { isDemoMode } from "@/lib/demo-data";
 
 const execFileAsync = promisify(execFile);
 const MAX_BUFFER = 512 * 1024;
@@ -132,6 +133,14 @@ export async function PUT(
     return applyHeaders(sessionError, guard.headers);
   }
 
+  if (isDemoMode()) {
+    const response = NextResponse.json({
+      success: true,
+      message: `Instruction sent to session ${sessionId} (demo)`,
+    });
+    return applyHeaders(response, guard.headers);
+  }
+
   const contentType = request.headers.get("content-type")?.toLowerCase() ?? "";
   if (!contentType.includes("application/json")) {
     const response = NextResponse.json(
@@ -211,6 +220,14 @@ export async function PATCH(
     return applyHeaders(sessionError, guard.headers);
   }
 
+  if (isDemoMode()) {
+    const response = NextResponse.json({
+      success: true,
+      message: `Cancel signal sent to session ${sessionId} (demo)`,
+    });
+    return applyHeaders(response, guard.headers);
+  }
+
   try {
     const pid = extractPid(sessionId);
     if (pid && (await isManagedAcpProcess(pid))) {
@@ -253,6 +270,14 @@ export async function DELETE(
   const sessionError = ensureValidSessionIdResponse(sessionId);
   if (sessionError) {
     return applyHeaders(sessionError, guard.headers);
+  }
+
+  if (isDemoMode()) {
+    const response = NextResponse.json({
+      success: true,
+      message: `Session ${sessionId} terminated (demo)`,
+    });
+    return applyHeaders(response, guard.headers);
   }
 
   try {

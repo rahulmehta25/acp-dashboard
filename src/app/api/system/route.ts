@@ -8,6 +8,7 @@ import {
   ensureApiToken,
   ensureLocalAccess,
 } from "@/lib/api-security";
+import { isDemoMode, getDemoSystemVitals } from "@/lib/demo-data";
 
 const execFileAsync = promisify(execFile);
 const MAX_BUFFER = 128 * 1024;
@@ -92,6 +93,11 @@ export async function GET(request: Request) {
 
   if (rateLimit.response) {
     return rateLimit.response;
+  }
+
+  if (isDemoMode()) {
+    const response = NextResponse.json(getDemoSystemVitals());
+    return applyHeaders(response, rateLimit.headers);
   }
 
   try {

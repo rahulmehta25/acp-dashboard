@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 const API_TOKEN =
   process.env.ACP_DASHBOARD_API_TOKEN || process.env.ACP_API_TOKEN || "";
 const TRUST_PROXY_HEADERS = process.env.ACP_DASHBOARD_TRUST_PROXY === "true";
+function isDemoMode(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+}
 
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const MAX_RATE_LIMIT_KEYS = 5000;
@@ -19,7 +22,7 @@ interface RateLimitResult {
 }
 
 export function ensureLocalAccess(request: Request): NextResponse | null {
-  if (process.env.ACP_DASHBOARD_ALLOW_REMOTE === "true") {
+  if (isDemoMode() || process.env.ACP_DASHBOARD_ALLOW_REMOTE === "true") {
     return null;
   }
 
@@ -47,6 +50,8 @@ export function ensureLocalAccess(request: Request): NextResponse | null {
 }
 
 export function ensureTrustedOrigin(request: Request): NextResponse | null {
+  if (isDemoMode()) return null;
+
   const origin = request.headers.get("origin") || "";
   if (!origin) {
     return null;
@@ -73,7 +78,7 @@ export function ensureTrustedOrigin(request: Request): NextResponse | null {
 }
 
 export function ensureApiToken(request: Request): NextResponse | null {
-  if (!API_TOKEN) {
+  if (isDemoMode() || !API_TOKEN) {
     return null;
   }
 

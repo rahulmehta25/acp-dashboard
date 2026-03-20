@@ -9,6 +9,7 @@ import {
   ensureApiToken,
   ensureLocalAccess,
 } from "@/lib/api-security";
+import { isDemoMode, getDemoStreamLines } from "@/lib/demo-data";
 
 const execFileAsync = promisify(execFile);
 const MAX_BUFFER = 256 * 1024;
@@ -123,6 +124,29 @@ export async function GET(
 
       void (async () => {
         send({ type: "connected", sessionId, timestamp: new Date().toISOString() });
+
+        if (isDemoMode()) {
+          const lines = getDemoStreamLines();
+          let i = 0;
+          const emit = () => {
+            if (closed || i >= lines.length) {
+              if (!closed) {
+                const hb = setInterval(() => {
+                  send({ type: "heartbeat", timestamp: new Date().toISOString() });
+                }, 10_000);
+                cleanups.push(() => clearInterval(hb));
+              }
+              return;
+            }
+            send(lines[i]);
+            i++;
+            const delay = 400 + Math.random() * 600;
+            const timer = setTimeout(emit, delay);
+            cleanups.push(() => clearTimeout(timer));
+          };
+          emit();
+          return;
+        }
 
         if (isSpawnSessionId(sessionId)) {
           const logPath = resolve("/tmp", `acp-${sessionId}.log`);

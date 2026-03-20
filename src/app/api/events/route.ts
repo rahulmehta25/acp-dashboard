@@ -8,6 +8,7 @@ import {
   ensureApiToken,
   ensureLocalAccess,
 } from "@/lib/api-security";
+import { isDemoMode, getDemoSessions } from "@/lib/demo-data";
 
 const execFileAsync = promisify(execFile);
 const MAX_BUFFER = 1024 * 1024;
@@ -230,7 +231,7 @@ export async function GET(request: NextRequest) {
       const poll = async () => {
         if (closed) return;
         try {
-          const snapshot = await collectSnapshot();
+          const snapshot = isDemoMode() ? getDemoSessions() : await collectSnapshot();
           send("update", snapshot);
         } catch {
           send("error", { message: "Snapshot failed", timestamp: new Date().toISOString() });

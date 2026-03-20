@@ -6,6 +6,7 @@ import {
   ensureLocalAccess,
   ensureTrustedOrigin,
 } from "@/lib/api-security";
+import { isDemoMode } from "@/lib/demo-data";
 
 export const dynamic = "force-dynamic";
 
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
 
     const voiceId = sanitizeVoiceId(payload.voiceId);
 
-    if (!ELEVENLABS_API_KEY) {
+    if (isDemoMode() || !ELEVENLABS_API_KEY) {
       const response = NextResponse.json(
         { error: "ELEVENLABS_API_KEY not configured", fallback: true },
         { status: 503 }
