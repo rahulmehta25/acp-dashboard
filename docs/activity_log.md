@@ -1,5 +1,19 @@
 # Activity Log
 
+## 2026-03-20 EST
+
+### User Prompt
+"Deploy ACP Dashboard to Vercel as a demo/portfolio piece with DEMO_MODE mock data"
+
+### Actions Taken
+- Updated `src/lib/demo-data.ts` with 4 realistic running sessions (claude, codex, gemini, amp) and 4 history entries with portfolio-worthy task descriptions
+- Verified all API routes already had demo mode checks returning mock data
+- Verified `src/lib/api-security.ts` bypasses local-only/token/origin checks in demo mode
+- Ran `npm run build` — passed with zero TypeScript errors
+- Deployed to Vercel with `NEXT_PUBLIC_DEMO_MODE=true` env var
+- Production URL: https://acp-dashboard-one.vercel.app
+- Committed all changes to main
+
 ## 2026-03-02 18:46 EST
 
 ### User Prompt
@@ -99,3 +113,22 @@
 - Modified `src/app/page.tsx` - integrated AgentAnalytics and FleetHeatmap sections between active sessions and history
 - Modified `src/app/page.tsx` - added DiffViewer to HistoryRow for completed sessions
 - Modified `src/app/page.tsx` - design cleanup: reduced glow intensity on all agent themes, updated borders to zinc-800 (#27272a), updated section headings to zinc-600 (#52525b), reduced header text shadow and HexRing blur
+
+## 2026-03-23 03:44 EST
+
+### User Prompt
+"Write a professional README.md for this project"
+
+### Actions Taken
+- Read package.json, DESIGN.md, API routes, and page.tsx to understand project structure
+- Created README.md with:
+  - Badges for Next.js, TypeScript, React, and Framer Motion
+  - Overview explaining the Jarvis-style mission control purpose
+  - ASCII architecture diagram showing data flow
+  - "Why This Architecture" section explaining polling + SSE choice
+  - Features list (session monitoring, spawning, streaming, vitals)
+  - Getting Started with installation and environment variables
+  - API routes table
+  - Project structure
+  - TODO noting the page.tsx refactor needed
+  - MIT license
